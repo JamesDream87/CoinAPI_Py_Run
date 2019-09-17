@@ -1,5 +1,5 @@
 import requests
-import json
+import json,pymysql
 import datetime
 
 def WriteJson(name, time, con):
@@ -73,9 +73,41 @@ def CheckJson(name,time):
     return True
 
 
+def WriteSQL(table, con, time):
+  # Read the json file
+  fo = open('data.json')
+  json_str = json.loads(fo.read())
+  # change the time to insert
+  time.replace('DAY', 'D')
+  time.replace('HRS', 'H')
+  time.replace('MIN', 'M')
+
+  # split the symbol name and get the exchange name
+  exchange = table.split('_')[0]
+
+  #Connect the MySQL
+  db = pymysql.connect(con['host'], con['user'], con['password'], con['database'], charset='utf8mb4')
+  cursor = db.cursor()
+
+  for i in range(len(json_str)):
+    json_str[i]['time_period_start'] = json_str[i]['time_period_start'].replace('0000000Z', '000000Z')
+    json_str[i]['time_period_end'] = json_str[i]['time_period_end'].replace('0000000Z', '000000Z')
+    
+    sql = f'INSERT INTO {table}(exchange,start_at,end_at,open,high,low,close,volume,trades_count,interval_at)values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
+    
+    cursor.execute(sql,(exchange, json_str[i]['time_period_start'],json_str[i]['time_period_end'],json_str[i]['price_open'],
+    json_str[i]['price_high'],json_str[i]['price_low'],json_str[i]['price_close'],json_str[i]['volume_traded'],json_str[i]['trades_count'],time))
+    db.commit()
+    
+  db.close()
+
 def Main(name, time, table, con):
   Res = WriteJson(name, time, con)
-  print(Res)
-  # if Res == True:
-  #   Count = CheckJson(name, time)
-  #   print(Count)
+
+  if Res == True:
+    Count = CheckJson(name, time)
+    if Count == True:
+      WriteSQL(table, con, time)
+      # print('写入成功')
+    else:
+      print(f'请检查数据-{name}-{time}')
