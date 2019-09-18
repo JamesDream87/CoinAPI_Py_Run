@@ -2,6 +2,11 @@ import requests
 import json,pymysql
 import datetime
 
+"""
+  由于CoinAPI的限制，一天的数据只有UTC时间，无法获取UTC+8时区的一天数据。所以此处只获取一天以内的数据。
+  
+"""
+
 def WriteJson(name, time, con):
   base = f'https://rest.coinapi.io/v1/ohlcv/{name}/history?'
   period = time
@@ -92,6 +97,8 @@ def WriteSQL(table, con, time):
   for i in range(len(json_str)):
     json_str[i]['time_period_start'] = json_str[i]['time_period_start'].replace('0000000Z', '000000Z')
     json_str[i]['time_period_end'] = json_str[i]['time_period_end'].replace('0000000Z', '000000Z')
+    json_str[i]['time_period_start'] = datetime.datetime.strptime(json_str[i]['time_period_start'], '%Y-%m-%dT%H:%M:%S.%fZ') + datetime.timedelta(hours = 8)
+    json_str[i]['time_period_end'] = datetime.datetime.strptime(json_str[i]['time_period_end'], '%Y-%m-%dT%H:%M:%S.%fZ') + datetime.timedelta(hours = 8)
     
     sql = f'INSERT INTO {table}(exchange,start_at,end_at,open,high,low,close,volume,trades_count,interval_at)values(%s,%s,%s,%s,%s,%s,%s,%s,%s,%s)'
     
