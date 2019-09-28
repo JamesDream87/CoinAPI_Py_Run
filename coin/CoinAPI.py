@@ -10,7 +10,7 @@ import datetime
 def WriteJson(name, time, con):
   base = f'https://rest.coinapi.io/v1/ohlcv/{name}/history?'
   period = time
-  limit = '100'
+  limit = '10000'
 
   # Set the Start time and End time
   now = datetime.datetime.now()
