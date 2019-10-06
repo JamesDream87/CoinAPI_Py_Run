@@ -4,7 +4,7 @@ from setting import config
 
 
 con = config.config
-url = 'https://rest.coinapi.io/v1/symbols?filter_symbol_id=HUOBIPRO_SPOT_EOS_USDT'
+url = 'https://rest.coinapi.io/v1/symbols?filter_symbol_id=BitStamp_SPOT_BTC_USD'
 headers = {'X-CoinAPI-Key' : con['key']}
 response = requests.get(url, headers=headers)
 
