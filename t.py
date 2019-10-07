@@ -19,6 +19,7 @@ def count():
     
     if year == 2019 and month == 10 :
       break
+    
     main(year,month)
 
 count()
